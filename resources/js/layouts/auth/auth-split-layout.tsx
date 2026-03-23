@@ -34,25 +34,29 @@ export default function AuthSplitLayout({
                 return;
             }
 
-            gsap.fromTo(
-                '.form-container',
-                { xPercent: isLogin ? 100 : -100 },
-                {
-                    xPercent: isLogin ? 0 : 100,
-                    duration: 0.8,
-                    ease: 'expo.inOut',
-                },
-            );
-
-            gsap.fromTo(
-                '.panel-container',
-                { xPercent: isLogin ? -100 : 100 },
-                {
-                    xPercent: isLogin ? 0 : -100,
-                    duration: 0.8,
-                    ease: 'expo.inOut',
-                },
-            );
+            if (isLogin) {
+                gsap.fromTo(
+                    '.form-container',
+                    { xPercent: 100 },
+                    { xPercent: 0, duration: 0.8, ease: 'expo.inOut' },
+                );
+                gsap.fromTo(
+                    '.panel-container',
+                    { xPercent: -100 },
+                    { xPercent: 0, duration: 0.8, ease: 'expo.inOut' },
+                );
+            } else {
+                gsap.fromTo(
+                    '.form-container',
+                    { xPercent: 0 },
+                    { xPercent: 100, duration: 0.8, ease: 'expo.inOut' },
+                );
+                gsap.fromTo(
+                    '.panel-container',
+                    { xPercent: 0 },
+                    { xPercent: -100, duration: 0.8, ease: 'expo.inOut' },
+                );
+            }
         },
         { dependencies: [type], scope: container },
     );
@@ -99,11 +103,13 @@ export default function AuthSplitLayout({
                         <h2 className="text-3xl font-bold italic">
                             {isLogin ? '¿Eres nuevo?' : '¡Bienvenido de nuevo!'}
                         </h2>
+
                         <p className="text-zinc-400">
                             {isLogin
                                 ? 'Regístrate para empezar a gestionar el material de tu aula.'
                                 : 'Accede con tu cuenta para continuar donde lo dejaste.'}
                         </p>
+
                         <Link
                             href={isLogin ? register() : login()}
                             className="mt-4 inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-medium text-black transition-transform hover:scale-105"
