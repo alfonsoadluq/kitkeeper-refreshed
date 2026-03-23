@@ -20,19 +20,30 @@ export default function AuthSplitLayout({
 }: AuthSplitLayoutProps) {
     const { name } = usePage().props;
     const container = useRef<HTMLDivElement>(null);
+    const isFirstRender = useRef(true);
+    const isLogin = type === 'login';
 
     useGSAP(
         () => {
-            gsap.fromTo(
-                '.anim-form',
-                { x: type === 'login' ? -50 : 50, opacity: 0 },
-                { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out' },
-            );
-            gsap.fromTo(
-                '.anim-panel',
-                { x: type === 'login' ? 50 : -50, opacity: 0 },
-                { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out' },
-            );
+            if (isFirstRender.current) {
+                isFirstRender.current = false;
+                gsap.set('.form-container', { xPercent: isLogin ? 0 : 100 });
+                gsap.set('.panel-container', { xPercent: isLogin ? 0 : -100 });
+
+                return;
+            }
+
+            gsap.to('.form-container', {
+                xPercent: isLogin ? 0 : 100,
+                duration: 0.8,
+                ease: 'expo.inOut',
+            });
+
+            gsap.to('.panel-container', {
+                xPercent: isLogin ? 0 : -100,
+                duration: 0.8,
+                ease: 'expo.inOut',
+            });
         },
         { dependencies: [type], scope: container },
     );
@@ -40,16 +51,12 @@ export default function AuthSplitLayout({
     return (
         <div
             ref={container}
-            className="relative flex min-h-screen overflow-hidden bg-background"
+            className="relative flex min-h-screen w-full overflow-hidden bg-background"
         >
-            <div
-                className={`anim-form flex w-full flex-col justify-center px-8 py-12 sm:px-12 lg:w-1/2 lg:px-20 ${
-                    type === 'login' ? 'order-1' : 'order-2'
-                }`}
-            >
+            <div className="form-container z-20 flex w-full flex-col justify-center bg-background px-8 py-12 sm:px-12 lg:w-1/2 lg:px-20">
                 <div className="mx-auto w-full max-w-sm">
                     <div className="mb-8 lg:hidden">
-                        <Link href={home()} className="flex justify-center">
+                        <Link href={home()}>
                             <AppLogoIcon className="h-10 fill-current" />
                         </Link>
                     </div>
@@ -65,52 +72,38 @@ export default function AuthSplitLayout({
                 </div>
             </div>
 
-            <div
-                className={`anim-panel relative hidden w-1/2 flex-col bg-zinc-900 p-12 text-white lg:flex ${
-                    type === 'login' ? 'order-2 border-l' : 'order-1 border-r'
-                } border-zinc-800`}
-            >
+            <div className="panel-container absolute inset-y-0 left-1/2 z-10 hidden w-1/2 flex-col border-l border-zinc-800 bg-zinc-900 p-12 text-white lg:flex">
                 <div className="relative z-20 flex items-center text-lg font-medium">
-                    <Link href={home()} className="flex items-center gap-2">
+                    <Link
+                        href={home()}
+                        className="flex items-center gap-2 text-white"
+                    >
                         <AppLogoIcon className="size-8 fill-current text-white" />
                         {name}
                     </Link>
                 </div>
 
                 <div className="relative z-20 m-auto max-w-sm text-center">
-                    {type === 'login' ? (
-                        <>
-                            <h2 className="mb-4 text-3xl font-bold">
-                                ¿No tienes cuenta?
-                            </h2>
-                            <p className="mb-8 text-zinc-400">
-                                Únete a KitKeeper para gestionar todos los
-                                materiales de tu centro de forma eficiente.
-                            </p>
-                            <Link
-                                href={register()}
-                                className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-700 px-8 text-sm font-medium transition-colors hover:bg-zinc-800"
-                            >
-                                Crear una cuenta
-                            </Link>
-                        </>
-                    ) : (
-                        <>
-                            <h2 className="mb-4 text-3xl font-bold">
-                                ¡Bienvenido de nuevo!
-                            </h2>
-                            <p className="mb-8 text-zinc-400">
-                                Si ya formas parte de KitKeeper, accede a tu
-                                panel de control.
-                            </p>
-                            <Link
-                                href={login()}
-                                className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-700 px-8 text-sm font-medium transition-colors hover:bg-zinc-800"
-                            >
-                                Iniciar sesión
-                            </Link>
-                        </>
-                    )}
+                    <div className="flex flex-col gap-4">
+                        <h2 className="text-3xl font-bold italic">
+                            {isLogin ? '¿Eres nuevo?' : '¡Bienvenido de nuevo!'}
+                        </h2>
+                        <p className="text-zinc-400">
+                            {isLogin
+                                ? 'Regístrate para empezar a gestionar el material de tu aula.'
+                                : 'Accede con tu cuenta para continuar donde lo dejaste.'}
+                        </p>
+                        <Link
+                            href={isLogin ? register() : login()}
+                            className="mt-4 inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-medium text-black transition-transform hover:scale-105"
+                        >
+                            {isLogin ? 'Crear cuenta' : 'Iniciar sesión'}
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="relative z-20 mt-auto text-xs text-zinc-500">
+                    © 2025 KitKeeper
                 </div>
             </div>
         </div>
