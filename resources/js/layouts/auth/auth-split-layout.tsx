@@ -20,30 +20,39 @@ export default function AuthSplitLayout({
 }: AuthSplitLayoutProps) {
     const { name } = usePage().props;
     const container = useRef<HTMLDivElement>(null);
-    const isFirstRender = useRef(true);
     const isLogin = type === 'login';
 
     useGSAP(
         () => {
-            if (isFirstRender.current) {
-                isFirstRender.current = false;
+            const prevType = sessionStorage.getItem('auth_type');
+            sessionStorage.setItem('auth_type', type);
+
+            if (!prevType || prevType === type) {
                 gsap.set('.form-container', { xPercent: isLogin ? 0 : 100 });
                 gsap.set('.panel-container', { xPercent: isLogin ? 0 : -100 });
 
                 return;
             }
 
-            gsap.to('.form-container', {
-                xPercent: isLogin ? 0 : 100,
-                duration: 0.8,
-                ease: 'expo.inOut',
-            });
+            gsap.fromTo(
+                '.form-container',
+                { xPercent: isLogin ? 100 : -100 },
+                {
+                    xPercent: isLogin ? 0 : 100,
+                    duration: 0.8,
+                    ease: 'expo.inOut',
+                },
+            );
 
-            gsap.to('.panel-container', {
-                xPercent: isLogin ? 0 : -100,
-                duration: 0.8,
-                ease: 'expo.inOut',
-            });
+            gsap.fromTo(
+                '.panel-container',
+                { xPercent: isLogin ? -100 : 100 },
+                {
+                    xPercent: isLogin ? 0 : -100,
+                    duration: 0.8,
+                    ease: 'expo.inOut',
+                },
+            );
         },
         { dependencies: [type], scope: container },
     );
@@ -60,6 +69,7 @@ export default function AuthSplitLayout({
                             <AppLogoIcon className="h-10 fill-current" />
                         </Link>
                     </div>
+
                     <div className="mb-6 flex flex-col gap-2">
                         <h1 className="text-2xl font-semibold tracking-tight">
                             {title}
@@ -68,6 +78,7 @@ export default function AuthSplitLayout({
                             {description}
                         </p>
                     </div>
+
                     {children}
                 </div>
             </div>
@@ -103,7 +114,7 @@ export default function AuthSplitLayout({
                 </div>
 
                 <div className="relative z-20 mt-auto text-xs text-zinc-500">
-                    © 2025 KitKeeper
+                    © 2026 KitKeeper
                 </div>
             </div>
         </div>
